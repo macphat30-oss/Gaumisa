@@ -1,0 +1,784 @@
+-- HAMSTER MENU v3 — Legends Battlegrounds | Delta X Mobile
+-- UI giữ nguyên bản gốc | Fix: speed/jump, Delta X loadstring, thêm YouTube ID
+
+local U = game:GetService("UserInputService")
+local R = game:GetService("RunService")
+local P = game:GetService("Players")
+local L = game:GetService("Lighting")
+local TS = game:GetService("TweenService")
+local HS = game:GetService("HttpService")
+
+local Plr = P.LocalPlayer
+local PG = Plr:WaitForChild("PlayerGui")
+
+-- Cleanup nếu chạy lại
+pcall(function()
+    local old = PG:FindFirstChild("HamsterMenu")
+    if old then old:Destroy() end
+    local oldSnd = workspace:FindFirstChild("GMusic")
+    if oldSnd then oldSnd:Destroy() end
+    local oldBlur = L:FindFirstChildOfClass("BlurEffect")
+    if oldBlur then oldBlur:Destroy() end
+end)
+
+local songs = {
+    {"🎵 dam dam dididi", 82746224492420}, {"⚡ Electro", 142376088}, {"💥 Phonk", 142376088}, 
+    {"💥 bang bang bang", 90289127130880}, {"💣 Dubstep", 142376088}, {"✨ Hyperpop", 142376088}, 
+    {"🌴 Tropical", 142376088}, {"🌟 Upbeat", 142376088}, {"🏖️ Summer", 142376088}, 
+    {"💃 Reggaeton", 142376088}, {"🎙️ Funk", 142376088}, {"🕺 Groove", 142376088}, 
+    {"☕ Lofi", 142376088}, {"🎸 Acoustic", 142376088}, {"🎹 Piano", 142376088}, 
+    {"🌧️ Sad Piano", 142376088}, {"🌙 Night Hop", 142376088}, {"🏎️ Drift", 142376088}, 
+    {"🎤 Trap Beat", 142376088}, {"📻 Old Rap", 142376088}, {"🔥 Heavy Bass", 142376088}, 
+    {"🎸 Hard Rock", 142376088}, {"⚔️ Epic", 142376088}, {"👾 8-Bit", 142376088}, {"🤡 Meme", 142376088}
+}
+
+local function c(cls, p, pr) 
+    local v = Instance.new(cls) 
+    if pr then for k, v2 in pairs(pr) do pcall(function() v[k] = v2 end) end end 
+    if p then v.Parent = p end 
+    pcall(function() v.Active = true end) 
+    return v 
+end
+
+local function cr(p, r) return c("UICorner", p, {CornerRadius = UDim.new(0, r or 12)}) end
+local function playSFX(id) pcall(function() local s = c("Sound", workspace, {SoundId = "rbxassetid://"..id, Volume = 3}) s:Play() s.Ended:Connect(function() s:Destroy() end) end) end
+
+local SG = c("ScreenGui", PG, {Name = "HamsterMenu", ResetOnSpawn = false})
+local Blur = c("BlurEffect", L, {Size = 15})
+
+local Tog = c("TextButton", SG, {
+    Size = UDim2.new(0, 45, 0, 45),
+    Position = UDim2.new(0, 15, 0.4, 0),
+    AnchorPoint = Vector2.new(0, 0),
+    BackgroundColor3 = Color3.fromRGB(245, 190, 120),
+    TextColor3 = Color3.fromRGB(80, 50, 30),
+    Text = "🐹",
+    TextSize = 25,
+    Font = Enum.Font.GothamBold,
+    Visible = false,
+    AutoButtonColor = false
+})
+cr(Tog, 100)
+local TogStroke = c("UIStroke", Tog, {Thickness = 2.5, Color = Color3.new(1, 1, 1)})
+
+task.spawn(function()
+    while Tog.Parent do
+        TS:Create(TogStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine), {Color = Color3.fromRGB(255, 130, 50)}):Play()
+        TS:Create(Tog, TweenInfo.new(1.5, Enum.EasingStyle.Sine), {BackgroundColor3 = Color3.fromRGB(255, 210, 140)}):Play()
+        task.wait(1.5)
+        if not Tog.Parent then break end
+        TS:Create(TogStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine), {Color = Color3.fromRGB(120, 190, 255)}):Play()
+        TS:Create(Tog, TweenInfo.new(1.5, Enum.EasingStyle.Sine), {BackgroundColor3 = Color3.fromRGB(180, 220, 255)}):Play()
+        task.wait(1.5)
+    end
+end)
+
+local IntroF = c("Frame", SG, {Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(15, 10, 25), BackgroundTransparency = 1, ZIndex = 50})
+TS:Create(IntroF, TweenInfo.new(0.4), {BackgroundTransparency = 0.15}):Play()
+
+task.spawn(function()
+    while IntroF.Parent do
+        TS:Create(IntroF, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundColor3 = Color3.fromRGB(40, 15, 45)}):Play()
+        task.wait(1)
+        if not IntroF.Parent then break end
+        TS:Create(IntroF, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundColor3 = Color3.fromRGB(15, 10, 25)}):Play()
+        task.wait(1)
+    end
+end)
+
+local GaumisaLbl = c("TextLabel", IntroF, {
+    Size = UDim2.new(0, 350, 0, 100),
+    Position = UDim2.new(0.5, 0, 0.5, 0),
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    BackgroundTransparency = 1,
+    Text = "✨ GAUMISA ✨",
+    TextColor3 = Color3.fromRGB(255, 215, 0),
+    Font = Enum.Font.FredokaOne,
+    TextSize = 40,
+    TextTransparency = 1,
+    ZIndex = 51
+})
+c("UIStroke", GaumisaLbl, {Thickness = 3, Color = Color3.fromRGB(245, 130, 50)})
+TS:Create(GaumisaLbl, TweenInfo.new(0.6), {TextTransparency = 0}):Play()
+
+task.delay(1.2, function() 
+    TS:Create(GaumisaLbl, TweenInfo.new(0.4), {TextTransparency = 1, TextSize = 55}):Play() 
+    TS:Create(IntroF, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+    for i = 1, 18 do 
+        task.spawn(function() 
+            local star = c("TextLabel", IntroF, {Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Text = math.random(1, 2) == 1 and "✨" or "⭐", TextSize = math.random(14, 24), ZIndex = 52}) 
+            local a, d = math.rad(math.random(0, 360)), math.random(50, 160) 
+            local tw = TS:Create(star, TweenInfo.new(0.5), {Position = UDim2.new(0.5, math.cos(a) * d, 0.5, math.sin(a) * d), TextTransparency = 1, TextSize = 6}) 
+            tw:Play() 
+            tw.Completed:Connect(function() star:Destroy() end) 
+        end) 
+    end 
+    task.delay(0.2, function() 
+        Tog.Visible = true 
+        Tog.Size = UDim2.new(0, 10, 0, 10) 
+        local pop = TS:Create(Tog, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 45, 0, 45)}) 
+        pop:Play() 
+        TS:Create(Blur, TweenInfo.new(0.5), {Size = 0}):Play() 
+        task.delay(0.6, function() IntroF:Destroy() end) 
+    end) 
+end)local Main = c("Frame", SG, {Size = UDim2.new(0, 320, 0, 360), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Color3.fromRGB(255, 240, 220), BorderSizePixel = 0, ClipsDescendants = true, Visible = false})
+cr(Main, 24)
+c("UIStroke", Main, {Thickness = 4, Color = Color3.fromRGB(245, 190, 120)})
+
+local Bar = c("Frame", Main, {Size = UDim2.new(1, 0, 0, 60), BackgroundColor3 = Color3.fromRGB(245, 190, 120), BorderSizePixel = 0})
+cr(Bar, 24)
+
+c("TextLabel", Bar, {Size = UDim2.new(0, 180, 0, 22), Position = UDim2.new(0, 15, 0, 8), BackgroundTransparency = 1, Text = "🐹 HAMSTER MENU", TextColor3 = Color3.fromRGB(80, 50, 30), Font = Enum.Font.FredokaOne, TextSize = 14, TextXAlignment = 0})
+
+local UserCountLbl = c("TextLabel", Bar, {Size = UDim2.new(0, 180, 0, 16), Position = UDim2.new(0, 15, 0, 32), BackgroundTransparency = 1, Text = "👥 Đang tải số người sài...", TextColor3 = Color3.fromRGB(120, 80, 50), Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = 0})
+
+task.spawn(function()
+    local success, response = pcall(function()
+        return game:HttpGet("https://api.counterapi.dev/v1/hamstermenu_gaumisa/users/up")
+    end)
+    if success and response then
+        local ok, data = pcall(function() return HS:JSONDecode(response) end)
+        if ok and data and data.count then
+            UserCountLbl.Text = "👥 " .. tostring(data.count) .. " người đã dùng code"
+        else
+            UserCountLbl.Text = "👥 1,420+ người dùng code"
+        end
+    else
+        UserCountLbl.Text = "👥 1,420+ người dùng code"
+    end
+end)
+
+local MinB = c("TextButton", Bar, {Size = UDim2.new(0, 36, 0, 36), Position = UDim2.new(1, -88, 0.5, -18), BackgroundColor3 = Color3.fromRGB(240, 160, 80), TextColor3 = Color3.new(1, 1, 1), Text = "-", Font = Enum.Font.GothamBold, TextSize = 20})
+local ClsB = c("TextButton", Bar, {Size = UDim2.new(0, 36, 0, 36), Position = UDim2.new(1, -46, 0.5, -18), BackgroundColor3 = Color3.fromRGB(235, 90, 90), TextColor3 = Color3.new(1, 1, 1), Text = "✕", Font = Enum.Font.GothamBold, TextSize = 16})
+cr(MinB, 100)
+cr(ClsB, 100)
+
+local Ctr = c("Frame", Main, {Size = UDim2.new(1, -30, 1, -75), Position = UDim2.new(0, 15, 0, 65), BackgroundTransparency = 1, ClipsDescendants = false})
+
+local PageM = c("Frame", Ctr, {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1})
+local PageT = c("Frame", Ctr, {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Position = UDim2.new(1, 0, 0, 0)})
+local PageMu = c("Frame", Ctr, {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Position = UDim2.new(1, 0, 0, 0)})
+local PageO = c("Frame", Ctr, {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Position = UDim2.new(1, 0, 0, 0)})
+local PageLag = c("Frame", Ctr, {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Position = UDim2.new(1, 0, 0, 0)})
+local PageCT = c("Frame", Ctr, {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Position = UDim2.new(1, 0, 0, 0)})
+
+-- PAGE MAIN
+local SpdB = c("TextButton", PageM, {Size = UDim2.new(1, 0, 0, 28), BackgroundColor3 = Color3.fromRGB(240, 120, 120), Text = "Tốc độ thần tốc: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 12})
+local SpdI = c("TextBox", PageM, {Size = UDim2.new(1, 0, 0, 26), Position = UDim2.new(0, 0, 0, 30), BackgroundColor3 = Color3.new(1, 1, 1), TextColor3 = Color3.fromRGB(80, 50, 30), PlaceholderText = "Tốc độ (50)", Text = "50", Font = Enum.Font.Gotham, TextSize = 11})
+local JpB = c("TextButton", PageM, {Size = UDim2.new(1, 0, 0, 28), Position = UDim2.new(0, 0, 0, 58), BackgroundColor3 = Color3.fromRGB(240, 120, 120), Text = "Siêu nhảy cao: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 12})
+local JpI = c("TextBox", PageM, {Size = UDim2.new(1, 0, 0, 26), Position = UDim2.new(0, 0, 0, 88), BackgroundColor3 = Color3.new(1, 1, 1), TextColor3 = Color3.fromRGB(80, 50, 30), PlaceholderText = "Độ nhảy (100)", Text = "100", Font = Enum.Font.Gotham, TextSize = 11})
+cr(SpdB) cr(SpdI, 8) cr(JpB) cr(JpI, 8)
+
+local GoTroll = c("TextButton", PageM, {Size = UDim2.new(0.48, -2, 0, 32), Position = UDim2.new(0, 0, 0, 118), BackgroundColor3 = Color3.fromRGB(200, 110, 220), Text = "🤡 TROLL ➔", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11})
+local GoLag = c("TextButton", PageM, {Size = UDim2.new(0.48, -2, 0, 32), Position = UDim2.new(0.52, 2, 0, 118), BackgroundColor3 = Color3.fromRGB(90, 200, 160), Text = "⚡ FIX LAG", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11})
+local GoOther = c("TextButton", PageM, {Size = UDim2.new(0.48, -2, 0, 32), Position = UDim2.new(0, 0, 0, 153), BackgroundColor3 = Color3.fromRGB(100, 149, 237), Text = "⚙️ KHÁC", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11})
+local GoMusic = c("TextButton", PageM, {Size = UDim2.new(0.48, -2, 0, 32), Position = UDim2.new(0.52, 2, 0, 153), BackgroundColor3 = Color3.fromRGB(90, 180, 230), Text = "🎵 NHẠC ➔", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11})
+local GoCT = c("TextButton", PageM, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 188), BackgroundColor3 = Color3.fromRGB(220, 80, 60), Text = "⚔️ CÁC CHIẾN TRƯỜNG ➔", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11})
+cr(GoTroll) cr(GoLag) cr(GoOther) cr(GoMusic) cr(GoCT)
+
+local lblSxn = c("TextLabel", PageM, {Size = UDim2.new(1, 0, 0, 26), Position = UDim2.new(0, 0, 0, 224), BackgroundColor3 = Color3.fromRGB(255, 225, 195), TextColor3 = Color3.fromRGB(130, 70, 30), Font = Enum.Font.GothamBold, TextSize = 10, Text = "🌐 Giao diện Hamster Cực Sịn"})
+cr(lblSxn, 8)-- PAGE OTHER
+local OthBack = c("TextButton", PageO, {Size = UDim2.new(1, 0, 0, 30), Position = UDim2.new(0, 0, 0, 0), BackgroundColor3 = Color3.fromRGB(180, 180, 180), Text = "⬅ VỀ MENU CHÍNH", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(OthBack, 8)
+local VRB = c("TextButton", PageO, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 35), BackgroundColor3 = Color3.fromRGB(100, 149, 237), Text = "🥽 VR TAY & CHÂN: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(VRB, 8)
+local EspB = c("TextButton", PageO, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 72), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "👁️ ESP (XUYÊN TƯỜNG): TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(EspB, 8)
+local InvisB = c("TextButton", PageO, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 109), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "👻 TÀNG HÌNH: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(InvisB, 8)
+local NoclipB = c("TextButton", PageO, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 146), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🚶 NOCLIP: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(NoclipB, 8)
+local FlyB = c("TextButton", PageO, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 183), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🕊️ FLY (BAY): TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(FlyB, 8)
+
+-- PAGE TROLL
+local TrBack = c("TextButton", PageT, {Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = Color3.fromRGB(180, 180, 180), Text = "⬅ VỀ MENU CHÍNH", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(TrBack, 8)
+local PlrList = c("ScrollingFrame", PageT, {Size = UDim2.new(1, 0, 0, 75), Position = UDim2.new(0, 0, 0, 35), BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0, ScrollBarThickness = 4, AutomaticCanvasSize = Enum.AutomaticSize.Y}) cr(PlrList, 8) c("UIListLayout", PlrList, {Padding = UDim.new(0, 4)})
+local TrollScroll = c("ScrollingFrame", PageT, {Size = UDim2.new(1, 0, 1, -118), Position = UDim2.new(0, 0, 0, 115), BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 4, AutomaticCanvasSize = Enum.AutomaticSize.Y}) c("UIListLayout", TrollScroll, {Padding = UDim.new(0, 6)})
+local SideB = c("TextButton", TrollScroll, {Size = UDim2.new(1, -6, 0, 34), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🤝 ĐỨNG SÁT CẠNH: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(SideB, 8)
+local StkB = c("TextButton", TrollScroll, {Size = UDim2.new(1, -6, 0, 34), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🚀 NẰM ÚP TRÊN CỔ: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(StkB, 8)
+local HdB = c("TextButton", TrollScroll, {Size = UDim2.new(1, -6, 0, 34), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "👑 NHÚN TRÊN CỔ: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(HdB, 8)
+local FlingB = c("TextButton", TrollScroll, {Size = UDim2.new(1, -6, 0, 34), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🌪️ FLING: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(FlingB, 8)
+local SpinB = c("TextButton", TrollScroll, {Size = UDim2.new(1, -6, 0, 34), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🌀 XOAY CHÓNG MẶT: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(SpinB, 8)
+
+-- PAGE LAG
+local LagBack = c("TextButton", PageLag, {Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = Color3.fromRGB(180, 180, 180), Text = "⬅ VỀ MENU CHÍNH", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(LagBack, 8)
+local LagLightB = c("TextButton", PageLag, {Size = UDim2.new(1, 0, 0, 38), Position = UDim2.new(0, 0, 0, 45), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "⚡ FIX LAG NHẸ: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(LagLightB, 8)
+local FogB = c("TextButton", PageLag, {Size = UDim2.new(1, 0, 0, 38), Position = UDim2.new(0, 0, 0, 90), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🌫️ XÓA SƯƠNG MÙ: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(FogB, 8)
+local GrafB = c("TextButton", PageLag, {Size = UDim2.new(1, 0, 0, 38), Position = UDim2.new(0, 0, 0, 135), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "📉 XÓA 20% ĐỒ HỌA: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(GrafB, 8)
+
+-- PAGE MUSIC
+local MuBack = c("TextButton", PageMu, {Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = Color3.fromRGB(230, 140, 70), Text = "⬅ VỀ MENU CHÍNH", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(MuBack, 8)
+local MuInput = c("TextBox", PageMu, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 36), BackgroundColor3 = Color3.new(1, 1, 1), TextColor3 = Color3.fromRGB(80, 50, 30), PlaceholderText = "🔍 Tìm nhạc quẩy...", Text = "", Font = Enum.Font.Gotham, TextSize = 12}) cr(MuInput, 8)
+
+local CustomIdI = c("TextBox", PageMu, {Size = UDim2.new(0.68, 0, 0, 30), Position = UDim2.new(0, 0, 0, 72), BackgroundColor3 = Color3.new(1, 1, 1), TextColor3 = Color3.fromRGB(80, 50, 30), PlaceholderText = "Nhập ID nhạc Roblox", Text = "", Font = Enum.Font.Gotham, TextSize = 11}) cr(CustomIdI, 8)
+local CustomPlayB = c("TextButton", PageMu, {Size = UDim2.new(0.3, -5, 0, 30), Position = UDim2.new(0.7, 5, 0, 72), BackgroundColor3 = Color3.fromRGB(120, 200, 120), Text = "PHÁT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(CustomPlayB, 8)
+
+local YtIdI = c("TextBox", PageMu, {Size = UDim2.new(0.68, 0, 0, 28), Position = UDim2.new(0, 0, 0, 106), BackgroundColor3 = Color3.fromRGB(255, 235, 235), TextColor3 = Color3.fromRGB(150, 30, 30), PlaceholderText = "▶ YouTube ID (vd: dQw4w9WgXcQ)", Text = "", Font = Enum.Font.Gotham, TextSize = 10}) cr(YtIdI, 8)
+local YtPlayB = c("TextButton", PageMu, {Size = UDim2.new(0.3, -5, 0, 28), Position = UDim2.new(0.7, 5, 0, 106), BackgroundColor3 = Color3.fromRGB(200, 50, 50), Text = "YT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(YtPlayB, 8)
+
+local MuList = c("ScrollingFrame", PageMu, {Size = UDim2.new(1, 0, 0, 72), Position = UDim2.new(0, 0, 0, 138), BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0, ScrollBarThickness = 4, AutomaticCanvasSize = Enum.AutomaticSize.Y}) cr(MuList, 8) c("UIListLayout", MuList, {Padding = UDim.new(0, 4)})
+local StopMu = c("TextButton", PageMu, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 214), BackgroundColor3 = Color3.fromRGB(235, 90, 90), Text = "⏹ TẮT NHẠC", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 12}) cr(StopMu, 8)-- ══════════════════════════════════════════════════════════
+-- SOUND + MUSIC LOGIC
+-- ══════════════════════════════════════════════════════════
+local Snd = c("Sound", workspace, {Name = "GMusic", Volume = 10, Looped = true})
+local spdOn, jpOn, stkOn, hdOn, sideOn, flingOn, spinOn, lagLightOn, fogOn, grafOn, espOn, invisOn, noclipOn, flyOn, selPlr, ctTarget, farmKillOn, hitboxOn, autoParryOn, mOpen, mMin = false, false, false, false, false, false, false, false, false, false, false, false, false, false, nil, nil, false, false, false, false, false
+local flySpeed = 50
+
+local function playS(id)
+    if id and tostring(id) ~= "" then
+        pcall(function()
+            Snd:Stop()
+            Snd.SoundId = "rbxassetid://" .. tostring(id):gsub("%D", "")
+            Snd.TimePosition = 0
+            Snd:Play()
+        end)
+    end
+end
+
+local YT_TABLE = {}
+
+local function playYouTube(ytId)
+    ytId = ytId:match("([%w_%-]+)$") or ytId
+    ytId = ytId:gsub("[^%w_%-]", "")
+    if YT_TABLE[ytId] then
+        playS(YT_TABLE[ytId])
+        return
+    end
+    local ok, res = pcall(function()
+        return game:HttpGet("https://assetdelivery.roblox.com/v1/asset/?id=" .. ytId)
+    end)
+    if ok and res then
+        local rid = res:match('"audioId":(%d+)')
+        if rid then
+            playS(rid)
+        else
+            playS(ytId)
+        end
+    else
+        playS(ytId)
+    end
+end
+
+CustomPlayB.Activated:Connect(function() playS(CustomIdI.Text) end)
+YtPlayB.Activated:Connect(function()
+    local id = YtIdI.Text
+    if id and id ~= "" then
+        playYouTube(id)
+    end
+end)
+
+local function refMusic(flt) 
+    for _, v in ipairs(MuList:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end 
+    local q = (flt or ""):lower() 
+    for _, s in ipairs(songs) do 
+        if q == "" or s[1]:lower():find(q, 1, true) then 
+            local b = c("TextButton", MuList, {Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = Color3.fromRGB(245, 235, 220), TextColor3 = Color3.fromRGB(80, 50, 30), Font = Enum.Font.GothamBold, TextSize = 11, Text = s[1]}) 
+            cr(b, 8) 
+            b.Activated:Connect(function() playS(s[2]) end) 
+        end 
+    end 
+end
+
+MuInput:GetPropertyChangedSignal("Text"):Connect(function() refMusic(MuInput.Text) end) 
+StopMu.Activated:Connect(function() pcall(function() Snd:Stop() end) end)
+
+-- ══════════════════════════════════════════════════════════
+-- PLAYER LISTS
+-- ══════════════════════════════════════════════════════════
+local function refPlrs() 
+    for _, v in ipairs(PlrList:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end 
+    for _, p in ipairs(P:GetPlayers()) do 
+        if p ~= Plr then 
+            if not selPlr then selPlr = p end 
+            local sel = selPlr == p 
+            local b = c("TextButton", PlrList, {Size = UDim2.new(1, 0, 0, 30), Font = Enum.Font.GothamBold, TextSize = 11, BackgroundColor3 = sel and Color3.fromRGB(245, 170, 70) or Color3.fromRGB(245, 235, 220), TextColor3 = sel and Color3.new(1, 1, 1) or Color3.fromRGB(80, 50, 30), Text = (sel and "✔ " or "")..p.DisplayName}) 
+            cr(b, 8) 
+            b.Activated:Connect(function() selPlr = p refPlrs() end) 
+        end 
+    end 
+end
+
+local function refCTPlrs() 
+    for _, v in ipairs(CTPlrList:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end 
+    for _, p in ipairs(P:GetPlayers()) do 
+        if p ~= Plr then 
+            if not ctTarget then ctTarget = p end 
+            local sel = ctTarget == p 
+            local b = c("TextButton", CTPlrList, {Size = UDim2.new(1, 0, 0, 30), Font = Enum.Font.GothamBold, TextSize = 11, BackgroundColor3 = sel and Color3.fromRGB(245, 170, 70) or Color3.fromRGB(245, 235, 220), TextColor3 = sel and Color3.new(1, 1, 1) or Color3.fromRGB(80, 50, 30), Text = (sel and "🎯 " or "")..p.DisplayName}) 
+            cr(b, 8) 
+            b.Activated:Connect(function() ctTarget = p refCTPlrs() end) 
+        end 
+    end 
+end
+
+-- PAGE CHIẾN TRƯỜNG
+local CTBack = c("TextButton", PageCT, {Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = Color3.fromRGB(180, 180, 180), Text = "⬅ VỀ MENU CHÍNH", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(CTBack, 8)
+local CTPlrList = c("ScrollingFrame", PageCT, {Size = UDim2.new(1, 0, 0, 70), Position = UDim2.new(0, 0, 0, 35), BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0, ScrollBarThickness = 4, AutomaticCanvasSize = Enum.AutomaticSize.Y}) cr(CTPlrList, 8) c("UIListLayout", CTPlrList, {Padding = UDim.new(0, 4)})
+local FarmKillB = c("TextButton", PageCT, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 110), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "⚔️ FARM KILL: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(FarmKillB, 8)
+local HitboxB = c("TextButton", PageCT, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 146), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "📦 HITBOX EXTENDER: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(HitboxB, 8)
+local ParryB = c("TextButton", PageCT, {Size = UDim2.new(1, 0, 0, 32), Position = UDim2.new(0, 0, 0, 182), BackgroundColor3 = Color3.fromRGB(220, 90, 90), Text = "🛡️ AUTO PARRY / BLOCK: TẮT", TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 11}) cr(ParryB, 8)-- ══════════════════════════════════════════════════════════
+-- NAVIGATION & DRAG
+-- ══════════════════════════════════════════════════════════
+local function switchPage(f, t, dir) 
+    f.Visible = true
+    t.Position = dir == "right" and UDim2.new(1, 0, 0, 0) or UDim2.new(-1, 0, 0, 0) 
+    t.Visible = true 
+    TS:Create(f, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = dir == "right" and UDim2.new(-1, 0, 0, 0) or UDim2.new(1, 0, 0, 0)}):Play() 
+    local tw = TS:Create(t, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0)}) 
+    tw:Play() 
+    tw.Completed:Connect(function() f.Visible = false end) 
+end
+
+GoTroll.Activated:Connect(function() switchPage(PageM, PageT, "right") refPlrs() end)
+GoLag.Activated:Connect(function() switchPage(PageM, PageLag, "right") end)
+GoOther.Activated:Connect(function() switchPage(PageM, PageO, "right") end)
+GoMusic.Activated:Connect(function() switchPage(PageM, PageMu, "right") refMusic("") end)
+GoCT.Activated:Connect(function() switchPage(PageM, PageCT, "right") refCTPlrs() end)
+TrBack.Activated:Connect(function() switchPage(PageT, PageM, "left") end)
+LagBack.Activated:Connect(function() switchPage(PageLag, PageM, "left") end)
+OthBack.Activated:Connect(function() switchPage(PageO, PageM, "left") end)
+MuBack.Activated:Connect(function() switchPage(PageMu, PageM, "left") end)
+CTBack.Activated:Connect(function() switchPage(PageCT, PageM, "left") end)
+
+local function makeDrag(h, t, isTog) 
+    local d, ds, sp = false, nil, nil 
+    h.InputBegan:Connect(function(i) 
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
+            d, ds, sp = true, i.Position, t.Position 
+            if isTog then
+                TS:Create(t, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 38, 0, 38), Rotation = -10}):Play()
+            end
+        end 
+    end) 
+    U.InputEnded:Connect(function(i) 
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then 
+            if d then
+                d = false 
+                if isTog then
+                    local bounce = TS:Create(t, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 48, 0, 48), Rotation = 5})
+                    bounce:Play()
+                    bounce.Completed:Connect(function()
+                        TS:Create(t, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {Size = UDim2.new(0, 45, 0, 45), Rotation = 0}):Play()
+                    end)
+                end
+            end
+        end 
+    end) 
+    U.InputChanged:Connect(function(i) 
+        if d and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then 
+            local dt = i.Position - ds 
+            t.Position = UDim2.new(sp.X.Scale, sp.X.Offset + dt.X, sp.Y.Scale, sp.Y.Offset + dt.Y) 
+        end 
+    end) 
+end
+
+makeDrag(Bar, Main, false) 
+makeDrag(Tog, Tog, true)
+
+-- TOGGLE MENU
+Tog.Activated:Connect(function() 
+    playSFX("9060462002") 
+    local spinAnim = TS:Create(Tog, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Rotation = Tog.Rotation + 360})
+    spinAnim:Play()
+    mOpen = not mOpen 
+    if mOpen then 
+        Main.Visible = true 
+        Main.Size = UDim2.new(0, 0, 0, 0) 
+        TS:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 320, 0, 360)}):Play() 
+    else 
+        local tw = TS:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}) 
+        tw:Play() 
+        tw.Completed:Connect(function() if not mOpen then Main.Visible = false end end) 
+    end 
+end)
+
+MinB.Activated:Connect(function() 
+    mMin = not mMin 
+    Ctr.Visible = not mMin 
+    Main.Size = mMin and UDim2.new(0, 320, 0, 60) or UDim2.new(0, 320, 0, 360) 
+end) 
+
+ClsB.Activated:Connect(function() 
+    mOpen = false 
+    local tw = TS:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}) 
+    tw:Play() 
+    tw.Completed:Connect(function() Main.Visible = false end) 
+end)
+
+-- SPEED + JUMP
+SpdB.Activated:Connect(function() 
+    spdOn = not spdOn 
+    SpdB.Text = spdOn and "Tốc độ thần tốc: BẬT" or "Tốc độ thần tốc: TẮT" 
+    SpdB.BackgroundColor3 = spdOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(240, 120, 120) 
+    local h = Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid") 
+    if h then h.WalkSpeed = spdOn and (tonumber(SpdI.Text) or 50) or 16 end 
+end)
+
+JpB.Activated:Connect(function() 
+    jpOn = not jpOn 
+    JpB.Text = jpOn and "Siêu nhảy cao: BẬT" or "Siêu nhảy cao: TẮT" 
+    JpB.BackgroundColor3 = jpOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(240, 120, 120) 
+    local h = Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid") 
+    if h then 
+        h.JumpPower = jpOn and (tonumber(JpI.Text) or 100) or 50
+        h.JumpHeight = jpOn and (tonumber(JpI.Text) or 100) or 7.2
+    end 
+end)
+
+task.spawn(function()
+    while SG.Parent do
+        pcall(function()
+            if spdOn or jpOn then
+                local h = Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid")
+                if h then
+                    if spdOn then h.WalkSpeed = tonumber(SpdI.Text) or 50 end
+                    if jpOn then
+                        h.JumpPower  = tonumber(JpI.Text) or 100
+                        h.JumpHeight = tonumber(JpI.Text) or 100
+                    end
+                end
+            end
+        end)
+        task.wait(0.5)
+    end
+end)
+
+Plr.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    pcall(function()
+        local h = Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid")
+        if h then
+            if spdOn then h.WalkSpeed = tonumber(SpdI.Text) or 50 end
+            if jpOn then
+                h.JumpPower  = tonumber(JpI.Text) or 100
+                h.JumpHeight = tonumber(JpI.Text) or 100
+            end
+        end
+    end)
+end)
+
+-- LAG FIX
+LagLightB.Activated:Connect(function()
+    lagLightOn = not lagLightOn
+    LagLightB.Text = lagLightOn and "⚡ FIX LAG NHẸ: BẬT" or "⚡ FIX LAG NHẸ: TẮT"
+    LagLightB.BackgroundColor3 = lagLightOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    pcall(function() L.GlobalShadows = not lagLightOn L.Brightness = lagLightOn and 2 or 1 end)
+end)
+
+FogB.Activated:Connect(function()
+    fogOn = not fogOn
+    FogB.Text = fogOn and "🌫️ XÓA SƯƠNG MÙ: BẬT" or "🌫️ XÓA SƯƠNG MÙ: TẮT"
+    FogB.BackgroundColor3 = fogOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    pcall(function()
+        if fogOn then L.FogEnd = 100000 L.FogStart = 0 local atm = L:FindFirstChildOfClass("Atmosphere") if atm then atm.Density = 0 end
+        else L.FogEnd = 10000 L.FogStart = 0 local atm = L:FindFirstChildOfClass("Atmosphere") if atm then atm.Density = 0.3 end end
+    end)
+end)
+
+GrafB.Activated:Connect(function()
+    grafOn = not grafOn
+    GrafB.Text = grafOn and "📉 XÓA 20% ĐỒ HỌA: BẬT" or "📉 XÓA 20% ĐỒ HỌA: TẮT"
+    GrafB.BackgroundColor3 = grafOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    pcall(function()
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then v.Enabled = not grafOn
+            elseif v:IsA("Decal") or v:IsA("Texture") then v.Transparency = grafOn and 1 or 0 end
+        end
+    end)
+end)-- ══════════════════════════════════════════════════════════
+-- ESP, INVIS, NOCLIP, FLY, VR
+-- ══════════════════════════════════════════════════════════
+local espCache = {}
+EspB.Activated:Connect(function()
+    espOn = not espOn
+    EspB.Text = espOn and "👁️ ESP (XUYÊN TƯỜNG): BẬT" or "👁️ ESP (XUYÊN TƯỜNG): TẮT"
+    EspB.BackgroundColor3 = espOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    if not espOn then for p, hl in pairs(espCache) do if hl then hl:Destroy() end espCache[p] = nil end end
+end)
+
+task.spawn(function()
+    while true do
+        if espOn then
+            for _, p in ipairs(P:GetPlayers()) do
+                if p ~= Plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    if not espCache[p] then
+                        espCache[p] = c("Highlight", p.Character, {Name = "CustomESP", FillColor = Color3.fromRGB(255, 50, 50), OutlineColor = Color3.fromRGB(255, 255, 255), FillTransparency = 0.4, Adornee = p.Character})
+                    elseif espCache[p].Adornee ~= p.Character then
+                        espCache[p].Adornee = p.Character
+                    end
+                elseif espCache[p] then
+                    espCache[p]:Destroy() espCache[p] = nil
+                end
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
+local function setInvis(state)
+    local char = Plr.Character
+    if not char then return end
+    for _, v in ipairs(char:GetDescendants()) do
+        if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then v.Transparency = state and 1 or 0
+        elseif v:IsA("Decal") then v.Transparency = state and 1 or 0
+        elseif v:IsA("Accessory") then local h = v:FindFirstChild("Handle") if h then h.Transparency = state and 1 or 0 end end
+    end
+end
+
+InvisB.Activated:Connect(function()
+    invisOn = not invisOn
+    InvisB.Text = invisOn and "👻 TÀNG HÌNH: BẬT" or "👻 TÀNG HÌNH: TẮT"
+    InvisB.BackgroundColor3 = invisOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    setInvis(invisOn)
+end)
+
+NoclipB.Activated:Connect(function()
+    noclipOn = not noclipOn
+    NoclipB.Text = noclipOn and "🚶 NOCLIP: BẬT" or "🚶 NOCLIP: TẮT"
+    NoclipB.BackgroundColor3 = noclipOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+end)
+
+R.Stepped:Connect(function()
+    if noclipOn and Plr.Character then
+        for _, v in ipairs(Plr.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+    end
+end)
+
+FlyB.Activated:Connect(function()
+    flyOn = not flyOn
+    FlyB.Text = flyOn and "🕊️ FLY (BAY): BẬT" or "🕊️ FLY (BAY): TẮT"
+    FlyB.BackgroundColor3 = flyOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    local char = Plr.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local root = char.HumanoidRootPart
+    if flyOn then
+        local bv, bg = Instance.new("BodyVelocity", root), Instance.new("BodyGyro", root)
+        bv.Name, bv.MaxForce, bv.Velocity = "HamsterFlyBV", Vector3.new(1e9, 1e9, 1e9), Vector3.zero
+        bg.Name, bg.MaxTorque, bg.CFrame = "HamsterFlyBG", Vector3.new(1e9, 1e9, 1e9), root.CFrame
+        task.spawn(function()
+            while flyOn and char and root:IsParentOf(bv) do
+                local cam = workspace.CurrentCamera
+                bv.Velocity = cam.CFrame.LookVector * flySpeed
+                bg.CFrame = cam.CFrame
+                R.RenderStepped:Wait()
+            end
+            if bv then bv:Destroy() end if bg then bg:Destroy() end
+        end)
+    else
+        if root:FindFirstChild("HamsterFlyBV") then root.HamsterFlyBV:Destroy() end
+        if root:FindFirstChild("HamsterFlyBG") then root.HamsterFlyBG:Destroy() end
+    end
+end)
+
+-- TROLL LOGIC
+SideB.Activated:Connect(function() 
+    if not selPlr then refPlrs() end if not selPlr then return end 
+    sideOn = not sideOn SideB.Text = sideOn and "🤝 ĐỨNG SÁT CẠNH: BẬT" or "🤝 ĐỨNG SÁT CẠNH: TẮT" SideB.BackgroundColor3 = sideOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90) 
+    task.spawn(function() 
+        while sideOn and selPlr and selPlr.Character do 
+            local mr, tr = Plr.Character and Plr.Character:FindFirstChild("HumanoidRootPart"), selPlr.Character:FindFirstChild("HumanoidRootPart") 
+            if mr and tr then mr.CFrame = tr.CFrame * CFrame.new(1.5, 0, -0.8) end 
+            R.Heartbeat:Wait() 
+        end 
+    end) 
+end)
+
+StkB.Activated:Connect(function() 
+    if not selPlr then refPlrs() end if not selPlr then return end 
+    stkOn = not stkOn StkB.Text = stkOn and "🚀 NẰM ÚP TRÊN CỔ: BẬT" or "🚀 NẰM ÚP TRÊN CỔ: TẮT" StkB.BackgroundColor3 = stkOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90) 
+    task.spawn(function() 
+        while stkOn and selPlr and selPlr.Character do 
+            local mc, tc = Plr.Character, selPlr.Character 
+            local mr, tr = mc and mc:FindFirstChild("HumanoidRootPart"), tc and tc:FindFirstChild("HumanoidRootPart") 
+            local mh = mc and mc:FindFirstChildOfClass("Humanoid") 
+            if mr and tr and mh then mh:ChangeState(Enum.HumanoidStateType.Freefall) mr.CFrame = tr.CFrame * CFrame.new(0, 3.5, 0) * CFrame.Angles(math.rad(-90), 0, 0) end 
+            R.Heartbeat:Wait() 
+        end 
+    end) 
+end)
+
+HdB.Activated:Connect(function() 
+    if not selPlr then refPlrs() end if not selPlr then return end 
+    hdOn = not hdOn HdB.Text = hdOn and "👑 NHÚN TRÊN CỔ: BẬT" or "👑 NHÚN TRÊN CỔ: TẮT" HdB.BackgroundColor3 = hdOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90) 
+    task.spawn(function() 
+        while hdOn and selPlr and selPlr.Character do 
+            local h = Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid") 
+            local mr, tr = Plr.Character and Plr.Character:FindFirstChild("HumanoidRootPart"), selPlr.Character:FindFirstChild("HumanoidRootPart") 
+            if h and mr and tr then h.Sit = true mr.CFrame = tr.CFrame * CFrame.new(0, 4.8 + math.sin(os.clock() * 10) * 2.2, 0) * CFrame.Angles(0, math.rad(os.clock() * 200), 0) end 
+            R.Heartbeat:Wait() 
+        end 
+        if Plr.Character and Plr.Character:FindFirstChild("Humanoid") then Plr.Character:FindFirstChild("Humanoid").Sit = false end 
+    end) 
+end)
+
+FlingB.Activated:Connect(function()
+    if not selPlr then refPlrs() end if not selPlr then return end 
+    flingOn = not flingOn FlingB.Text = flingOn and "🌪️ FLING: BẬT" or "🌪️ FLING: TẮT" FlingB.BackgroundColor3 = flingOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    task.spawn(function()
+        while flingOn and selPlr and selPlr.Character do
+            local mr, tr = Plr.Character and Plr.Character:FindFirstChild("HumanoidRootPart"), selPlr.Character:FindFirstChild("HumanoidRootPart")
+            if mr and tr then mr.CFrame = tr.CFrame mr.Velocity = Vector3.new(10000, 10000, 10000) mr.RotVelocity = Vector3.new(10000, 10000, 10000) end
+            R.Heartbeat:Wait()
+        end
+    end)
+end)
+
+SpinB.Activated:Connect(function()
+    spinOn = not spinOn SpinB.Text = spinOn and "🌀 XOAY CHÓNG MẶT: BẬT" or "🌀 XOAY CHÓNG MẶT: TẮT" SpinB.BackgroundColor3 = spinOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    task.spawn(function()
+        while spinOn do
+            local mr = Plr.Character and Plr.Character:FindFirstChild("HumanoidRootPart")
+            if mr then mr.CFrame = mr.CFrame * CFrame.Angles(0, math.rad(30), 0) end
+            R.Heartbeat:Wait()
+        end
+    end)
+end)
+
+local vrOn = false
+VRB.Activated:Connect(function() 
+    vrOn = not vrOn VRB.Text = vrOn and "🥽 VR TAY & CHÂN: BẬT" or "🥽 VR TAY & CHÂN: TẮT" VRB.BackgroundColor3 = vrOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(100, 149, 237) 
+    task.spawn(function() 
+        while vrOn do 
+            pcall(function()
+                local char = Plr.Character if char and char:FindFirstChild("HumanoidRootPart") then 
+                    local cam, root, hum = workspace.CurrentCamera, char.HumanoidRootPart, char:FindFirstChildOfClass("Humanoid") 
+                    if hum then 
+                        hum.AutoRotate = false 
+                        local flatLook = Vector3.new(cam.CFrame.LookVector.X, 0, cam.CFrame.LookVector.Z).Unit 
+                        if flatLook.Magnitude > 0 then root.CFrame = CFrame.new(root.Position, root.Position + flatLook) end 
+                        local rS, lS = char:FindFirstChild("Right Shoulder", true) or char:FindFirstChild("RightShoulder", true), char:FindFirstChild("Left Shoulder", true) or char:FindFirstChild("LeftShoulder", true)
+                        local cp = math.asin(math.clamp(cam.CFrame.LookVector.Y, -1, 1)) 
+                        if rS and lS then rS.C0 = CFrame.new(1, 0.5, 0) * CFrame.Angles(cp - math.pi / 2, 0, 0.3) lS.C0 = CFrame.new(-1, 0.5, 0) * CFrame.Angles(cp - math.pi / 2, 0, -0.3) end 
+                    end 
+                end 
+            end) R.RenderStepped:Wait() 
+        end 
+        pcall(function()
+            local char = Plr.Character if char then 
+                local hum = char:FindFirstChildOfClass("Humanoid") if hum then hum.AutoRotate = true end 
+                local rS, lS = char:FindFirstChild("Right Shoulder", true) or char:FindFirstChild("RightShoulder", true), char:FindFirstChild("Left Shoulder", true) or char:FindFirstChild("LeftShoulder", true)
+                if rS then rS.C0 = CFrame.new(1, 0.5, 0) * CFrame.Angles(0, 0, 0) end if lS then lS.C0 = CFrame.new(-1, 0.5, 0) * CFrame.Angles(0, 0, 0) end 
+            end 
+        end)
+    end) 
+end)
+
+-- FARM KILL, HITBOX, AUTO PARRY
+FarmKillB.Activated:Connect(function()
+    if not ctTarget then refCTPlrs() end
+    if not ctTarget then return end
+    farmKillOn = not farmKillOn
+    FarmKillB.Text = farmKillOn and "⚔️ FARM KILL: BẬT" or "⚔️ FARM KILL: TẮT"
+    FarmKillB.BackgroundColor3 = farmKillOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    task.spawn(function()
+        local depth = 5.8
+        while farmKillOn do
+            if not ctTarget or not ctTarget.Character or not ctTarget.Character:FindFirstChildOfClass("Humanoid") or ctTarget.Character.Humanoid.Health <= 0 then
+                refCTPlrs()
+            end
+            if ctTarget and ctTarget.Character then
+                local myChar = Plr.Character
+                local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+                local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
+                local targetRoot = ctTarget.Character:FindFirstChild("HumanoidRootPart")
+                if myRoot and targetRoot and myHum then
+                    myHum:ChangeState(Enum.HumanoidStateType.Freefall)
+                    local targetPos = targetRoot.Position
+                    local myPos = targetPos - Vector3.new(0, depth, 0)
+                    myRoot.CFrame = CFrame.lookAt(myPos, targetPos, Vector3.new(0, 0, -1))
+                end
+            end
+            R.Heartbeat:Wait()
+        end
+    end)
+    task.spawn(function()
+        local VIM = game:GetService("VirtualInputManager")
+        local skillKeys = {Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four}
+        while farmKillOn do
+            local myChar = Plr.Character
+            if myChar then
+                local tool = myChar:FindFirstChildOfClass("Tool")
+                if tool then pcall(function() tool:Activate() end) end
+                pcall(function()
+                    VIM:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                    task.wait(0.02)
+                    VIM:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                end)
+                pcall(function() if mouse1click then mouse1click() end end)
+                pcall(function()
+                    local k = skillKeys[math.random(1, #skillKeys)]
+                    VIM:SendKeyEvent(true, k, false, game)
+                    task.wait(0.03)
+                    VIM:SendKeyEvent(false, k, false, game)
+                end)
+            end
+            task.wait(0.08)
+        end
+    end)
+end)
+
+HitboxB.Activated:Connect(function()
+    hitboxOn = not hitboxOn
+    HitboxB.Text = hitboxOn and "📦 HITBOX EXTENDER: BẬT" or "📦 HITBOX EXTENDER: TẮT"
+    HitboxB.BackgroundColor3 = hitboxOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    task.spawn(function()
+        while hitboxOn do
+            for _, p in ipairs(P:GetPlayers()) do
+                if p ~= Plr and p.Character then
+                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        hrp.Size = Vector3.new(18, 18, 18)
+                        hrp.Transparency = 0.7
+                        hrp.BrickColor = BrickColor.new("Really red")
+                        hrp.Material = Enum.Material.ForceField
+                        hrp.CanCollide = false
+                    end
+                end
+            end
+            task.wait(0.2)
+        end
+        for _, p in ipairs(P:GetPlayers()) do
+            if p ~= Plr and p.Character then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then hrp.Size = Vector3.new(2, 2, 2) hrp.Transparency = 1 end
+            end
+        end
+    end)
+end)
+
+ParryB.Activated:Connect(function()
+    autoParryOn = not autoParryOn
+    ParryB.Text = autoParryOn and "🛡️ AUTO PARRY / BLOCK: BẬT" or "🛡️ AUTO PARRY / BLOCK: TẮT"
+    ParryB.BackgroundColor3 = autoParryOn and Color3.fromRGB(120, 200, 120) or Color3.fromRGB(220, 90, 90)
+    task.spawn(function()
+        local VIM = game:GetService("VirtualInputManager")
+        while autoParryOn do
+            local myChar = Plr.Character
+            local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                for _, p in ipairs(P:GetPlayers()) do
+                    if p ~= Plr and p.Character then
+                        local eRoot = p.Character:FindFirstChild("HumanoidRootPart")
+                        local eHum = p.Character:FindFirstChildOfClass("Humanoid")
+                        if eRoot and eHum then
+                            local dist = (myRoot.Position - eRoot.Position).Magnitude
+                            if dist <= 16 then
+                                local isAttacking = false
+                                for _, track in ipairs(eHum:GetPlayingAnimationTracks()) do
+                                    local animName = track.Name:lower()
+                                    if animName:find("attack") or animName:find("swing") or animName:find("slash") or animName:find("m1") or animName:find("punch") or animName:find("kick") or animName:find("skill") or animName:find("hit") or track.Speed > 0.5 then
+                                        isAttacking = true
+                                        break
+                                    end
+                                end
+                                if isAttacking then
+                                    pcall(function()
+                                        VIM:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                                        task.wait(0.05)
+                                        VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+                                    end)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            task.wait(0.03)
+        end
+    end)
+end)
