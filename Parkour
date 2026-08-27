@@ -1,0 +1,1093 @@
+-- LocalScript (PIXEL PARKOUR TROLL EDITION - PHẦN 1/3)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+if playerGui:FindFirstChild("PixelParkourGame") then
+    playerGui.PixelParkourGame:Destroy()
+end
+
+-- 1. HỆ THỐNG PHÁT NHẠC
+local bgMusic = Instance.new("Sound")
+bgMusic.Name = "ParkourBackgroundMusic"
+bgMusic.SoundId = "rbxassetid://115520764429413"
+bgMusic.Volume = 0.8
+bgMusic.Looped = false
+bgMusic.Parent = SoundService
+
+local gameFinished = false
+bgMusic:Play()
+
+task.spawn(function()
+    while not gameFinished do
+        task.wait(1)
+        if bgMusic and bgMusic.Parent then
+            if not bgMusic.IsPlaying and not gameFinished then
+                bgMusic:Play()
+            end
+        else
+            break
+        end
+    end
+end)
+
+-- 2. GIAO DIỆN GAME (GUI)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PixelParkourGame"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = playerGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0, 540, 0, 360)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
+MainFrame.Parent = ScreenGui
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14)
+
+local mainStroke = Instance.new("UIStroke", MainFrame)
+mainStroke.Thickness = 2.5
+mainStroke.Color = Color3.fromRGB(255, 30, 60)
+
+local SkipBtn = Instance.new("TextButton", MainFrame)
+SkipBtn.Size = UDim2.new(0, 110, 0, 34)
+SkipBtn.Position = UDim2.new(1, -120, 0, 8)
+SkipBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 50)
+Instance.new("UICorner", SkipBtn).CornerRadius = UDim.new(0, 8)
+
+local SkipTitle = Instance.new("TextLabel", SkipBtn)
+SkipTitle.Size = UDim2.new(1, 0, 1, 0)
+SkipTitle.BackgroundTransparency = 1
+SkipTitle.Text = "THOÁT GAME ❌"
+SkipTitle.Font = Enum.Font.FredokaOne
+SkipTitle.TextSize = 12
+SkipTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+SkipBtn.MouseButton1Click:Connect(function() 
+    gameFinished = true
+    bgMusic:Stop()
+    bgMusic:Destroy()
+    ScreenGui:Destroy() 
+end)
+
+local LevelText = Instance.new("TextLabel", MainFrame)
+LevelText.Position = UDim2.new(0, 15, 0, 10)
+LevelText.Size = UDim2.new(0, 150, 0, 30)
+LevelText.BackgroundTransparency = 1
+LevelText.Font = Enum.Font.FredokaOne
+LevelText.TextSize = 14
+LevelText.TextColor3 = Color3.fromRGB(255, 255, 255)
+LevelText.TextXAlignment = Enum.TextXAlignment.Left
+
+local DeathCountText = Instance.new("TextLabel", MainFrame)
+DeathCountText.Position = UDim2.new(0, 160, 0, 10)
+DeathCountText.Size = UDim2.new(0, 120, 0, 30)
+DeathCountText.BackgroundTransparency = 1
+DeathCountText.Font = Enum.Font.FredokaOne
+DeathCountText.TextSize = 14
+DeathCountText.TextColor3 = Color3.fromRGB(255, 70, 70)
+DeathCountText.TextXAlignment = Enum.TextXAlignment.Left
+DeathCountText.Text = "💀 0"
+
+local TrollAlertText = Instance.new("TextLabel", MainFrame)
+TrollAlertText.Position = UDim2.new(0.5, -150, 0, 10)
+TrollAlertText.Size = UDim2.new(0, 300, 0, 30)
+TrollAlertText.BackgroundTransparency = 1
+TrollAlertText.Font = Enum.Font.FredokaOne
+TrollAlertText.TextSize = 14
+TrollAlertText.TextColor3 = Color3.fromRGB(255, 215, 0)
+TrollAlertText.Text = ""
+TrollAlertText.ZIndex = 10
+
+local Canvas = Instance.new("Frame", MainFrame)
+Canvas.Position = UDim2.new(0, 15, 0, 48)
+Canvas.Size = UDim2.new(0, 510, 0, 230)
+Canvas.BackgroundColor3 = Color3.fromRGB(22, 18, 28)
+Canvas.ClipsDescendants = true
+Instance.new("UICorner", Canvas).CornerRadius = UDim.new(0, 10)
+
+-- NHÂN VẬT PIXEL
+local PixelCharacter = Instance.new("Frame", Canvas)
+PixelCharacter.Size = UDim2.new(0, 14, 0, 22)
+PixelCharacter.BackgroundTransparency = 1
+PixelCharacter.ZIndex = 5
+
+local Head = Instance.new("Frame", PixelCharacter)
+Head.Size = UDim2.new(0, 10, 0, 8)
+Head.Position = UDim2.new(0, 2, 0, 0)
+Head.BackgroundColor3 = Color3.fromRGB(255, 205, 148)
+Head.BorderSizePixel = 0
+
+local Eye = Instance.new("Frame", Head)
+Eye.Size = UDim2.new(0, 2, 0, 2)
+Eye.Position = UDim2.new(0, 6, 0, 2)
+Eye.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Eye.BorderSizePixel = 0
+
+local Body = Instance.new("Frame", PixelCharacter)
+Body.Size = UDim2.new(0, 10, 0, 8)
+Body.Position = UDim2.new(0, 2, 0, 8)
+Body.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+Body.BorderSizePixel = 0
+
+local LegL = Instance.new("Frame", PixelCharacter)
+LegL.Size = UDim2.new(0, 3, 0, 6)
+LegL.Position = UDim2.new(0, 2, 0, 16)
+LegL.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+LegL.BorderSizePixel = 0
+
+local LegR = Instance.new("Frame", PixelCharacter)
+LegR.Size = UDim2.new(0, 3, 0, 6)
+LegR.Position = UDim2.new(0, 9, 0, 16)
+LegR.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+LegR.BorderSizePixel = 0
+
+-- 3. THUẬT TOÁN SINH MAP & BẪY TROLL
+local currentLevel = 1
+local deathCount = 0
+local activeMapData = nil
+local currentPlatforms = {}
+local currentTraps = {}
+local currentPortals = {}
+local currentLasers = {}
+local currentSaws = {}
+local currentFallingBlocks = {}
+
+math.randomseed(tick() + os.time())
+
+local function createLevelData(lvl)
+    math.randomseed(lvl * 1234 + math.random(1, 9999))
+    local data = {
+        name = "LEVEL " .. lvl,
+        spawn = {x = 15, y = 150},
+        portals = {}, platforms = {}, traps = {}, lasers = {}, saws = {}, fallingBlocks = {}
+    }
+
+    table.insert(data.platforms, {x = 0, y = 180, w = 60, h = 50, type = "normal"})
+
+    if lvl == 1 then
+        data.name = "LEVEL 1"
+        for i = 1, 4 do
+            table.insert(data.platforms, {x = 60 + i * 75, y = 180 - i * 12, w = 50, h = 10, type = "normal"})
+        end
+        table.insert(data.platforms, {x = 420, y = 120, w = 90, h = 110, type = "normal"})
+        table.insert(data.portals, {x = 455, y = 86, correct = true})
+    else
+        local curX, curY = 60, 180
+        local targetX = 425
+
+        while curX < targetX - 55 do
+            local dx = math.random(50, 70) 
+            local dy = math.random(-30, 25)
+            curX = math.clamp(curX + dx, 60, targetX - 45)
+            curY = math.clamp(curY + dy, 70, 185)
+
+            local pType = "normal"
+            local randType = math.random(1, 100)
+            if randType <= 18 then pType = "breakable"
+            elseif randType <= 35 and lvl >= 3 then pType = "ice"
+            elseif randType <= 50 and lvl >= 4 then pType = "invisible"
+            elseif randType <= 65 and lvl >= 3 then pType = "fake_platform"
+            end
+
+            local platWidth = math.random(45, 55)
+            table.insert(data.platforms, {x = curX, y = curY, w = platWidth, h = 10, type = pType})
+
+            if lvl >= 2 and math.random(1, 100) <= 30 then
+                table.insert(data.traps, {
+                    x = curX + 12, y = curY - 8, w = 12, h = 8,
+                    moving = (lvl >= 6 and math.random(1, 100) <= 25),
+                    toggle = (lvl >= 3 and math.random(1, 100) <= 35),
+                    minX = curX + 2, maxX = curX + platWidth - 14
+                })
+            end
+
+            if lvl >= 3 and math.random(1, 100) <= 25 then
+                table.insert(data.saws, {
+                    x = curX + 10, y = curY - 26, size = 14,
+                    minX = curX - 5, maxX = curX + platWidth - 10, speed = math.random(20, 35)
+                })
+            end
+
+            if lvl >= 4 and math.random(1, 100) <= 30 then
+                table.insert(data.fallingBlocks, {
+                    x = curX + 15, startY = 0, triggerX = curX + 5, w = 18, h = 18, speed = 160
+                })
+            end
+        end
+
+        if lvl >= 4 and math.random(1, 100) <= 35 then
+            table.insert(data.lasers, {
+                x = math.random(180, 300), y = math.random(50, 130), w = 4, h = 45, speed = math.random(30, 50)
+            })
+        end
+
+        local finalY = math.clamp(curY + math.random(-15, 15), 70, 175)
+        table.insert(data.platforms, {x = targetX, y = finalY, w = 85, h = 230 - finalY, type = "normal"})
+        
+        if lvl >= 3 and math.random(1, 100) <= 45 then
+            table.insert(data.portals, {x = targetX - 40, y = finalY - 34, correct = false})
+            table.insert(data.portals, {x = targetX + 30, y = finalY - 34, correct = true})
+        else
+            table.insert(data.portals, {x = targetX + 30, y = finalY - 34, correct = true})
+        end
+    end
+
+    return data
+end
+
+local function loadMap(level)
+    if level > 100 then return false end
+    activeMapData = createLevelData(level)
+    LevelText.Text = activeMapData.name
+    TrollAlertText.Text = ""
+
+    for _, list in ipairs({currentPlatforms, currentTraps, currentPortals, currentLasers, currentSaws, currentFallingBlocks}) do
+        for _, obj in ipairs(list) do obj:Destroy() end
+    end
+    currentPlatforms, currentTraps, currentPortals, currentLasers, currentSaws, currentFallingBlocks = {}, {}, {}, {}, {}, {}
+
+    for _, p in ipairs(activeMapData.platforms) do
+        local pf = Instance.new("Frame", Canvas)
+        pf.Position = UDim2.new(0, p.x, 0, p.y)
+        pf.Size = UDim2.new(0, p.w, 0, p.h)
+        pf.BorderSizePixel = 0
+        
+        if p.type == "invisible" then
+            pf.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+            pf.BackgroundTransparency = 0.85
+        elseif p.type == "breakable" then
+            pf.BackgroundColor3 = Color3.fromRGB(255, 130, 0)
+        elseif p.type == "ice" then
+            pf.BackgroundColor3 = Color3.fromRGB(120, 220, 255)
+        elseif p.type == "fake_platform" then
+            pf.BackgroundColor3 = Color3.fromRGB(140, 60, 190)
+        else
+            pf.BackgroundColor3 = Color3.fromRGB(140, 60, 190)
+        end
+
+        Instance.new("UICorner", pf).CornerRadius = UDim.new(0, 3)
+        pf:SetAttribute("OrigX", p.x)
+        pf:SetAttribute("OrigY", p.y)
+        pf:SetAttribute("Type", p.type)
+        pf:SetAttribute("IsStepped", false)
+        pf:SetAttribute("Active", true)
+        pf:SetAttribute("IsFalling", false)
+        pf:SetAttribute("FallVelY", 0)
+        table.insert(currentPlatforms, pf)
+    end
+
+    for _, t in ipairs(activeMapData.traps) do
+        local trap = Instance.new("TextLabel", Canvas)
+        trap.Position = UDim2.new(0, t.x, 0, t.y)
+        trap.Size = UDim2.new(0, t.w, 0, t.h)
+        trap.BackgroundTransparency = 1
+        trap.Text = string.rep("▲", math.max(1, math.floor(t.w / 6)))
+        trap.Font = Enum.Font.SourceSansBold
+        trap.TextSize = 10
+        trap.TextColor3 = Color3.fromRGB(255, 40, 40)
+        trap:SetAttribute("Moving", t.moving or false)
+        trap:SetAttribute("Toggle", t.toggle or false)
+        trap:SetAttribute("MinX", t.minX or t.x)
+        trap:SetAttribute("MaxX", t.maxX or t.x)
+        trap:SetAttribute("Dir", 1)
+        table.insert(currentTraps, trap)
+    end
+
+    for _, s in ipairs(activeMapData.saws) do
+        local saw = Instance.new("TextLabel", Canvas)
+        saw.Position = UDim2.new(0, s.x, 0, s.y)
+        saw.Size = UDim2.new(0, s.size, 0, s.size)
+        saw.BackgroundTransparency = 1
+        saw.Text = "⚙️"
+        saw.TextSize = s.size
+        saw:SetAttribute("MinX", s.minX)
+        saw:SetAttribute("MaxX", s.maxX)
+        saw:SetAttribute("Speed", s.speed)
+        saw:SetAttribute("Dir", 1)
+        table.insert(currentSaws, saw)
+    end
+
+    for _, fb in ipairs(activeMapData.fallingBlocks) do
+        local block = Instance.new("Frame", Canvas)
+        block.Position = UDim2.new(0, fb.x, 0, fb.startY)
+        block.Size = UDim2.new(0, fb.w, 0, fb.h)
+        block.BackgroundColor3 = Color3.fromRGB(90, 90, 100)
+        block.BorderSizePixel = 0
+        Instance.new("UICorner", block).CornerRadius = UDim.new(0, 4)
+
+        local face = Instance.new("TextLabel", block)
+        face.Size = UDim2.new(1, 0, 1, 0)
+        face.BackgroundTransparency = 1
+        face.Text = "😡"
+        face.TextSize = 12
+
+        block:SetAttribute("TriggerX", fb.triggerX)
+        block:SetAttribute("StartY", fb.startY)
+        block:SetAttribute("Speed", fb.speed)
+        block:SetAttribute("IsFalling", false)
+        block:SetAttribute("IsReturning", false)
+        table.insert(currentFallingBlocks, block)
+    end
+
+    for _, l in ipairs(activeMapData.lasers) do
+        local laser = Instance.new("Frame", Canvas)
+        laser.Position = UDim2.new(0, l.x, 0, l.y)
+        laser.Size = UDim2.new(0, l.w, 0, l.h)
+        laser.BackgroundColor3 = Color3.fromRGB(255, 0, 50)
+        laser.BorderSizePixel = 0
+        laser:SetAttribute("Speed", l.speed)
+        laser:SetAttribute("Dir", 1)
+        table.insert(currentLasers, laser)
+    end
+
+    for _, pt in ipairs(activeMapData.portals) do
+        local portal = Instance.new("Frame", Canvas)
+        portal.Size = UDim2.new(0, 22, 0, 34)
+        portal.Position = UDim2.new(0, pt.x, 0, pt.y)
+        portal.BackgroundColor3 = Color3.fromRGB(255, 0, 120)
+        portal.BorderSizePixel = 0
+        Instance.new("UICorner", portal).CornerRadius = UDim.new(0, 10)
+
+        local inner = Instance.new("Frame", portal)
+        inner.Name = "InnerFrame"
+        inner.AnchorPoint = Vector2.new(0.5, 0.5)
+        inner.Position = UDim2.new(0.5, 0, 0.5, 0)
+        inner.Size = UDim2.new(0, 12, 0, 22)
+        inner.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        inner.BorderSizePixel = 0
+        Instance.new("UICorner", inner).CornerRadius = UDim.new(0, 6)
+
+        portal:SetAttribute("Correct", pt.correct)
+        table.insert(currentPortals, portal)
+    end
+
+    return true
+end
+-- LocalScript (PIXEL PARKOUR TROLL EDITION - PHẦN 2/3)
+local ControlsFrame = Instance.new("Frame", MainFrame)
+ControlsFrame.Position = UDim2.new(0, 15, 0, 288)
+ControlsFrame.Size = UDim2.new(0, 510, 0, 60)
+ControlsFrame.BackgroundTransparency = 1
+
+local function makeBtn(text, pos, size, color)
+    local btn = Instance.new("TextButton", ControlsFrame)
+    btn.Position = pos
+    btn.Size = size
+    btn.BackgroundColor3 = color or Color3.fromRGB(35, 40, 60)
+    btn.Text = text
+    btn.Font = Enum.Font.FredokaOne
+    btn.TextSize = 16
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    return btn
+end
+
+local LeftBtn = makeBtn("◀ TRÁI", UDim2.new(0, 0, 0, 10), UDim2.new(0, 120, 0, 42))
+local RightBtn = makeBtn("PHẢI ▶", UDim2.new(0, 130, 0, 10), UDim2.new(0, 120, 0, 42))
+local JumpBtn = makeBtn("⬆ NHẢY", UDim2.new(1, -150, 0, 10), UDim2.new(0, 150, 0, 42), Color3.fromRGB(255, 40, 80))
+
+local posX, posY = 15, 150
+local velX, velY = 0, 0
+local gravity = 950
+
+local firstJumpForce = -240  
+local secondJumpForce = -250 
+local maxJumps = 2           
+local jumpsLeft = maxJumps
+
+local moveSpeed = 160
+local isGrounded = false
+local wasGrounded = false
+local onIce = false
+local moveLeft, moveRight = false, false
+local animTime = 0
+local isDead = false
+local isTransitioning = false
+
+local squashX, squashY = 1, 1
+local targetRotation = 0
+
+-- 1. HIỆU ỨNG ANIMATION BƯỚC VÀO CỔNG
+local function playPortalEnterAnimation(portal, callback)
+    isTransitioning = true
+    velX, velY = 0, 0
+    
+    local portalX = portal.Position.X.Offset
+    local portalY = portal.Position.Y.Offset
+    local targetX = portalX + 4
+    local targetY = portalY + 6
+    
+    local t = 0
+    local conn
+    conn = RunService.Heartbeat:Connect(function(dt)
+        t = t + dt
+        local p = math.clamp(t / 0.45, 0, 1)
+        
+        posX = posX + (targetX - posX) * (dt * 15)
+        posY = posY + (targetY - posY) * (dt * 15)
+        PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+        
+        PixelCharacter.Rotation = PixelCharacter.Rotation + 30
+        local scale = math.max(0, 1 - p)
+        PixelCharacter.Size = UDim2.new(0, 14 * scale, 0, 22 * scale)
+        
+        if math.random(1, 2) == 1 then
+            local pOrb = Instance.new("Frame", Canvas)
+            pOrb.Size = UDim2.new(0, 4, 0, 4)
+            pOrb.Position = UDim2.new(0, portalX + math.random(2, 18), 0, portalY + math.random(2, 30))
+            pOrb.BackgroundColor3 = Color3.fromRGB(255, 100, 220)
+            pOrb.BorderSizePixel = 0
+            pOrb.ZIndex = 6
+            Instance.new("UICorner", pOrb).CornerRadius = UDim.new(1, 0)
+            task.delay(0.2, function() pOrb:Destroy() end)
+        end
+        
+        if p >= 1 then
+            conn:Disconnect()
+            PixelCharacter.Rotation = 0
+            PixelCharacter.Size = UDim2.new(0, 14, 0, 22)
+            if callback then callback() end
+        end
+    end)
+end
+
+-- 2. HIỆU ỨNG ANIMATION MỞ MAP TIẾP THEO
+local function playMapTransitionAnimation(nextLvl, callback)
+    local overlay = Instance.new("Frame", Canvas)
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.Position = UDim2.new(-1, 0, 0, 0)
+    overlay.BackgroundColor3 = Color3.fromRGB(15, 12, 22)
+    overlay.BorderSizePixel = 0
+    overlay.ZIndex = 20
+
+    local levelBanner = Instance.new("TextLabel", overlay)
+    levelBanner.Size = UDim2.new(1, 0, 1, 0)
+    levelBanner.BackgroundTransparency = 1
+    levelBanner.Text = "LEVEL " .. nextLvl
+    levelBanner.Font = Enum.Font.FredokaOne
+    levelBanner.TextSize = 22
+    levelBanner.TextColor3 = Color3.fromRGB(255, 215, 0)
+
+    local t = 0
+    local phase = 1
+    local conn
+    conn = RunService.Heartbeat:Connect(function(dt)
+        t = t + dt
+        if phase == 1 then
+            local p = math.clamp(t / 0.22, 0, 1)
+            overlay.Position = UDim2.new(-1 + p, 0, 0, 0)
+            if p >= 1 then
+                phase = 2
+                t = 0
+                if callback then callback() end
+            end
+        elseif phase == 2 then
+            if t >= 0.2 then
+                phase = 3
+                t = 0
+            end
+        elseif phase == 3 then
+            local p = math.clamp(t / 0.22, 0, 1)
+            overlay.Position = UDim2.new(p, 0, 0, 0)
+            if p >= 1 then
+                conn:Disconnect()
+                overlay:Destroy()
+                isTransitioning = false
+            end
+        end
+    end)
+end
+
+local function spawnLandingSmoke(x, y)
+    for i = 1, 4 do
+        local smoke = Instance.new("Frame", Canvas)
+        local sz = math.random(3, 5)
+        smoke.Size = UDim2.new(0, sz, 0, sz)
+        smoke.Position = UDim2.new(0, x + (i <= 2 and -2 or 12), 0, y + 18)
+        smoke.BackgroundColor3 = Color3.fromRGB(210, 215, 225)
+        smoke.BackgroundTransparency = 0.35
+        smoke.BorderSizePixel = 0
+        smoke.ZIndex = 4
+        Instance.new("UICorner", smoke).CornerRadius = UDim.new(1, 0)
+
+        local dirX = (i % 2 == 0) and math.random(15, 35) or math.random(-35, -15)
+        local t = 0
+        local conn
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            local cp = smoke.Position
+            smoke.Position = UDim2.new(0, cp.X.Offset + dirX * dt, 0, cp.Y.Offset - 6 * dt)
+            smoke.BackgroundTransparency = 0.35 + (t * 2.8)
+            if t >= 0.25 then
+                conn:Disconnect()
+                smoke:Destroy()
+            end
+        end)
+    end
+end
+
+local function spawnLightCyanTrail(x, y)
+    local trail = Instance.new("Frame", Canvas)
+    local sz = math.random(3, 6)
+    trail.Size = UDim2.new(0, sz, 0, sz)
+    trail.Position = UDim2.new(0, x + math.random(2, 10), 0, y + math.random(6, 18))
+    trail.BackgroundColor3 = Color3.fromRGB(140, 230, 255)
+    trail.BackgroundTransparency = 0.25
+    trail.BorderSizePixel = 0
+    trail.ZIndex = 4
+    Instance.new("UICorner", trail).CornerRadius = UDim.new(1, 0)
+
+    local t = 0
+    local conn
+    conn = RunService.Heartbeat:Connect(function(dt)
+        t = t + dt
+        trail.BackgroundTransparency = 0.25 + (t * 2.5)
+        local currSize = math.max(0, sz - t * 10)
+        trail.Size = UDim2.new(0, currSize, 0, currSize)
+        if t >= 0.3 then
+            conn:Disconnect()
+            trail:Destroy()
+        end
+    end)
+end
+
+local function spawnPixelParticles(x, y)
+    for i = 1, 6 do
+        local p = Instance.new("Frame", Canvas)
+        p.Size = UDim2.new(0, 4, 0, 4)
+        p.Position = UDim2.new(0, x + 5, 0, y + 10)
+        p.BackgroundColor3 = Color3.fromRGB(255, math.random(50, 150), 50)
+        p.BorderSizePixel = 0
+        
+        local angle = math.random() * math.pi * 2
+        local speed = math.random(50, 120)
+        local vx = math.cos(angle) * speed
+        local vy = math.sin(angle) * speed
+        
+        local t = 0
+        local conn
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            local cp = p.Position
+            p.Position = UDim2.new(0, cp.X.Offset + vx * dt, 0, cp.Y.Offset + vy * dt)
+            p.BackgroundTransparency = t * 2
+            if t >= 0.5 then
+                conn:Disconnect()
+                p:Destroy()
+            end
+        end)
+    end
+end
+
+local function spawnDoubleJumpEffect(x, y)
+    local effect = Instance.new("Frame", Canvas)
+    effect.Size = UDim2.new(0, 24, 0, 24)
+    effect.Position = UDim2.new(0, x - 5, 0, y + 5)
+    effect.BackgroundColor3 = Color3.fromRGB(0, 220, 255)
+    effect.BackgroundTransparency = 0.2
+    effect.BorderSizePixel = 0
+    Instance.new("UICorner", effect).CornerRadius = UDim.new(1, 0)
+
+    local t = 0
+    local conn
+    conn = RunService.Heartbeat:Connect(function(dt)
+        t = t + dt
+        local scale = 1 + t * 4
+        effect.Size = UDim2.new(0, 24 * scale, 0, 24 * scale)
+        effect.BackgroundTransparency = 0.2 + (t * 2)
+        if t >= 0.35 then
+            conn:Disconnect()
+            effect:Destroy()
+        end
+    end)
+end
+
+local function playRespawnAnimation()
+    local style = math.random(1, 3)
+    local t = 0
+    local conn
+    PixelCharacter.Visible = true
+
+    if style == 1 then
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            local progress = math.clamp(t / 0.35, 0, 1)
+            local scale = math.sin(progress * math.pi * 0.5) * 1.15
+            if progress > 0.8 then scale = 1 + (1 - progress) * 0.1 end
+            PixelCharacter.Size = UDim2.new(0, 14 * scale, 0, 22 * scale)
+            
+            if math.floor(t * 25) % 2 == 0 then
+                Body.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+            else
+                Body.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+            end
+
+            if progress >= 1 then
+                conn:Disconnect()
+                PixelCharacter.Size = UDim2.new(0, 14, 0, 22)
+                Body.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+                targetRotation = 0
+                PixelCharacter.Rotation = 0
+                isDead = false
+            end
+        end)
+    elseif style == 2 then
+        local startYOffset = posY - 40
+        local targetY = posY
+        posY = startYOffset
+        
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            local progress = math.clamp(t / 0.3, 0, 1)
+            posY = startYOffset + (targetY - startYOffset) * (1 - (1 - progress)^2)
+            PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+            PixelCharacter.Size = UDim2.new(0, 14, 0, 22)
+            
+            if progress >= 1 then
+                conn:Disconnect()
+                posY = targetY
+                squashX = 1.35
+                squashY = 0.65
+                targetRotation = 0
+                PixelCharacter.Rotation = 0
+                isDead = false
+            end
+        end)
+    else
+        local glow = Instance.new("Frame", Canvas)
+        glow.Size = UDim2.new(0, 0, 0, 0)
+        glow.Position = UDim2.new(0, posX + 7, 0, posY + 11)
+        glow.AnchorPoint = Vector2.new(0.5, 0.5)
+        glow.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+        glow.BorderSizePixel = 0
+        Instance.new("UICorner", glow).CornerRadius = UDim.new(1, 0)
+        
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            local progress = math.clamp(t / 0.35, 0, 1)
+            local size = progress * 60
+            glow.Size = UDim2.new(0, size, 0, size)
+            glow.BackgroundTransparency = progress
+            PixelCharacter.Size = UDim2.new(0, 14 * progress, 0, 22 * progress)
+
+            if progress >= 1 then
+                conn:Disconnect()
+                glow:Destroy()
+                PixelCharacter.Size = UDim2.new(0, 14, 0, 22)
+                targetRotation = 0
+                PixelCharacter.Rotation = 0
+                isDead = false
+            end
+        end)
+    end
+end
+
+local function respawnPlayer()
+    if isDead or isTransitioning then return end
+    isDead = true
+    velX, velY = 0, 0
+    deathCount = deathCount + 1
+    DeathCountText.Text = "💀 " .. deathCount
+
+    local style = math.random(1, 3)
+    local t = 0
+    local conn
+
+    if style == 1 then
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            PixelCharacter.Rotation = PixelCharacter.Rotation + 45
+            PixelCharacter.Size = UDim2.new(0, math.max(0, 14 * (1 - t * 3)), 0, math.max(0, 22 * (1 - t * 3)))
+            if t >= 0.35 then
+                conn:Disconnect()
+                spawnPixelParticles(posX, posY)
+                posX, posY = activeMapData.spawn.x, activeMapData.spawn.y
+                PixelCharacter.Rotation = 0
+                PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+                jumpsLeft = maxJumps
+                playRespawnAnimation()
+            end
+        end)
+    elseif style == 2 then
+        spawnPixelParticles(posX, posY)
+        PixelCharacter.Visible = false
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            if t >= 0.35 then
+                conn:Disconnect()
+                posX, posY = activeMapData.spawn.x, activeMapData.spawn.y
+                PixelCharacter.Rotation = 0
+                PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+                jumpsLeft = maxJumps
+                playRespawnAnimation()
+            end
+        end)
+    else
+        conn = RunService.Heartbeat:Connect(function(dt)
+            t = t + dt
+            posY = posY + (220 * dt)
+            PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+            PixelCharacter.Rotation = PixelCharacter.Rotation + 25
+            PixelCharacter.Size = UDim2.new(0, math.max(0, 14 * (1 - t * 2.5)), 0, math.max(0, 22 * (1 - t * 2.5)))
+            
+            if t >= 0.35 then
+                conn:Disconnect()
+                posX, posY = activeMapData.spawn.x, activeMapData.spawn.y
+                PixelCharacter.Rotation = 0
+                PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+                jumpsLeft = maxJumps
+                playRespawnAnimation()
+            end
+        end)
+    end
+end
+
+local function triggerJump()
+    if isDead or isTransitioning then return end
+    if isGrounded or jumpsLeft > 0 then
+        if isGrounded then
+            velY = firstJumpForce
+            isGrounded = false
+            jumpsLeft = maxJumps - 1
+            squashX = 0.75
+            squashY = 1.25
+            spawnLightCyanTrail(posX, posY)
+        elseif jumpsLeft > 0 then
+            velY = secondJumpForce
+            jumpsLeft = jumpsLeft - 1
+            squashX = 0.65
+            squashY = 1.35
+            targetRotation = targetRotation + 360 
+            spawnDoubleJumpEffect(posX, posY)
+            spawnLightCyanTrail(posX, posY)
+        end
+    end
+end
+
+JumpBtn.MouseButton1Down:Connect(triggerJump)
+LeftBtn.MouseButton1Down:Connect(function() moveLeft = true end)
+LeftBtn.MouseButton1Up:Connect(function() moveLeft = false end)
+RightBtn.MouseButton1Down:Connect(function() moveRight = true end)
+RightBtn.MouseButton1Up:Connect(function() moveRight = false end)
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.Left then moveLeft = true end
+    if input.KeyCode == Enum.KeyCode.D or input.KeyCode == Enum.KeyCode.Right then moveRight = true end
+    if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.Up then triggerJump() end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.Left then moveLeft = false end
+    if input.KeyCode == Enum.KeyCode.D or input.KeyCode == Enum.KeyCode.Right then moveRight = false end
+end)
+
+loadMap(currentLevel)
+posX, posY = activeMapData.spawn.x, activeMapData.spawn.y
+-- LocalScript (PIXEL PARKOUR TROLL EDITION - PHẦN 3/3)
+RunService.Heartbeat:Connect(function(dt)
+    if not ScreenGui.Parent or not activeMapData or isDead or isTransitioning or gameFinished then return end
+    animTime = animTime + dt
+
+    squashX = squashX + (1 - squashX) * math.clamp(dt * 12, 0, 1)
+    squashY = squashY + (1 - squashY) * math.clamp(dt * 12, 0, 1)
+    PixelCharacter.Rotation = PixelCharacter.Rotation + (targetRotation - PixelCharacter.Rotation) * math.clamp(dt * 15, 0, 1)
+
+    local accel = onIce and 3 or 15
+    local targetVelX = 0
+    if moveLeft then targetVelX = -moveSpeed end
+    if moveRight then targetVelX = moveSpeed end
+    velX = velX + (targetVelX - velX) * math.clamp(dt * accel, 0, 1)
+
+    velY = velY + gravity * dt
+    local nextX = posX + velX * dt
+    local nextY = posY + velY * dt
+    local pW, pH = 14, 22
+
+    if velX > 10 then Eye.Position = UDim2.new(0, 6, 0, 2)
+    elseif velX < -10 then Eye.Position = UDim2.new(0, 2, 0, 2) end
+
+    if (math.abs(velX) > 20 or not isGrounded) and math.random(1, 2) == 1 then
+        spawnLightCyanTrail(posX, posY)
+    end
+
+    for _, pt in ipairs(currentPortals) do
+        local inner = pt:FindFirstChild("InnerFrame")
+        if inner then
+            local pulse = (math.sin(animTime * 7) + 1) / 2
+            inner.Size = UDim2.new(0, 8 + pulse * 6, 0, 16 + pulse * 8)
+            inner.BackgroundTransparency = 0.1 + pulse * 0.3
+        end
+        pt.Rotation = math.sin(animTime * 3) * 6
+    end
+
+    for _, saw in ipairs(currentSaws) do
+        saw.Rotation = (saw.Rotation + 360 * dt * 2) % 360
+        local curX = saw.Position.X.Offset
+        local spd = saw:GetAttribute("Speed")
+        local dir = saw:GetAttribute("Dir")
+
+        curX = curX + (dir * spd * dt)
+        if curX >= saw:GetAttribute("MaxX") then dir = -1 elseif curX <= saw:GetAttribute("MinX") then dir = 1 end
+        saw:SetAttribute("Dir", dir)
+        saw.Position = UDim2.new(0, curX, 0, saw.Position.Y.Offset)
+
+        local sx, sy, sz = saw.Position.X.Offset, saw.Position.Y.Offset, saw.Size.X.Offset
+        if (nextX + pW > sx + 2) and (nextX < sx + sz - 2) and (nextY + pH > sy + 2) and (nextY < sy + sz - 2) then
+            respawnPlayer()
+            return
+        end
+    end
+
+    for _, fb in ipairs(currentFallingBlocks) do
+        local curY = fb.Position.Y.Offset
+        local triggerX = fb:GetAttribute("TriggerX")
+        local isFalling = fb:GetAttribute("IsFalling")
+        local isReturning = fb:GetAttribute("IsReturning")
+
+        if not isFalling and not isReturning and math.abs(posX - triggerX) < 20 then
+            fb:SetAttribute("IsFalling", true)
+        end
+
+        if isFalling then
+            curY = curY + (fb:GetAttribute("Speed") * dt)
+            if curY >= 180 then
+                curY = 180
+                fb:SetAttribute("IsFalling", false)
+                fb:SetAttribute("IsReturning", true)
+            end
+        elseif isReturning then
+            curY = curY - (40 * dt)
+            if curY <= fb:GetAttribute("StartY") then
+                curY = fb:GetAttribute("StartY")
+                fb:SetAttribute("IsReturning", false)
+            end
+        end
+
+        fb.Position = UDim2.new(0, fb.Position.X.Offset, 0, curY)
+        local fbx, fby = fb.Position.X.Offset, fb.Position.Y.Offset
+        if (nextX + pW > fbx) and (nextX < fbx + 18) and (nextY + pH > fby) and (nextY < fby + 18) then
+            respawnPlayer()
+            return
+        end
+    end
+
+    for _, l in ipairs(currentLasers) do
+        local curY = l.Position.Y.Offset
+        local spd = l:GetAttribute("Speed")
+        local dir = l:GetAttribute("Dir")
+
+        curY = curY + (dir * spd * dt)
+        if curY >= 160 then dir = -1 elseif curY <= 40 then dir = 1 end
+        l:SetAttribute("Dir", dir)
+        l.Position = UDim2.new(0, l.Position.X.Offset, 0, curY)
+
+        local lx, ly = l.Position.X.Offset, l.Position.Y.Offset
+        if (nextX + pW > lx) and (nextX < lx + 4) and (nextY + pH > ly) and (nextY < ly + 50) then
+            respawnPlayer()
+            return
+        end
+    end
+
+    for _, t in ipairs(currentTraps) do
+        if t:GetAttribute("Moving") then
+            local curX = t.Position.X.Offset
+            local dir = t:GetAttribute("Dir")
+            curX = curX + (dir * 40 * dt)
+            if curX >= t:GetAttribute("MaxX") then dir = -1 elseif curX <= t:GetAttribute("MinX") then dir = 1 end
+            t:SetAttribute("Dir", dir)
+            t.Position = UDim2.new(0, curX, 0, t.Position.Y.Offset)
+        end
+
+        if t:GetAttribute("Toggle") then
+            t.Visible = (math.sin(animTime * 4) > 0)
+        end
+
+        if t.Visible then
+            local tx, ty = t.Position.X.Offset, t.Position.Y.Offset
+            local tw, th = t.Size.X.Offset, t.Size.Y.Offset
+            if (nextX + pW > tx + 2) and (nextX < tx + tw - 2) and (nextY + pH > ty + 2) and (nextY < ty + th) then
+                respawnPlayer()
+                return
+            end
+        end
+    end
+
+    wasGrounded = isGrounded
+    isGrounded = false
+    onIce = false
+
+    for _, pf in ipairs(currentPlatforms) do
+        local pType = pf:GetAttribute("Type")
+        local isStepped = pf:GetAttribute("IsStepped")
+        local isActive = pf:GetAttribute("Active")
+        local origX = pf:GetAttribute("OrigX")
+        local origY = pf:GetAttribute("OrigY")
+        local pW_plat = pf.Size.X.Offset
+
+        if pf:GetAttribute("IsFalling") then
+            local curY = pf.Position.Y.Offset
+            local fallVel = pf:GetAttribute("FallVelY") + gravity * dt * 0.75
+            pf:SetAttribute("FallVelY", fallVel)
+            curY = curY + fallVel * dt
+            pf.Position = UDim2.new(0, pf.Position.X.Offset, 0, curY)
+
+            if curY > 260 and pf.Visible then
+                pf.Visible = false
+                pf:SetAttribute("IsFalling", false)
+                task.delay(1.8, function()
+                    if pf and pf.Parent then
+                        pf.Position = UDim2.new(0, origX, 0, origY)
+                        pf.BackgroundColor3 = Color3.fromRGB(255, 130, 0)
+                        pf.Visible = true
+                        pf:SetAttribute("IsStepped", false)
+                        pf:SetAttribute("Active", true)
+                        pf:SetAttribute("FallVelY", 0)
+                    end
+                end)
+            end
+        end
+
+        if isActive then
+            if (nextX + pW > origX) and (nextX < origX + pW_plat) then
+                if (posY + pH <= origY + 5) and (nextY + pH >= origY) then
+                    nextY = origY - pH
+                    velY = 0
+                    isGrounded = true
+                    jumpsLeft = maxJumps 
+                    targetRotation = 0 
+
+                    if pType == "ice" then onIce = true end
+
+                    if pType == "fake_platform" and not isStepped then
+                        pf:SetAttribute("IsStepped", true)
+                        pf.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+                        TrollAlertText.Text = "⚠️ BẪY LỪA ĐẢO! Hahaha 😂"
+                        
+                        task.delay(0.25, function()
+                            if pf and pf.Parent then
+                                pf:SetAttribute("Active", false)
+                                pf.Visible = false
+                                task.delay(2.0, function()
+                                    if pf and pf.Parent then
+                                        pf.Visible = true
+                                        pf.BackgroundColor3 = Color3.fromRGB(140, 60, 190)
+                                        pf:SetAttribute("IsStepped", false)
+                                        pf:SetAttribute("Active", true)
+                                    end
+                                end)
+                            end
+                        end)
+                    end
+
+                    if pType == "breakable" and not isStepped then
+                        pf:SetAttribute("IsStepped", true)
+                        pf.BackgroundColor3 = Color3.fromRGB(255, 70, 0)
+
+                        task.delay(0.35, function()
+                            if pf and pf.Parent then
+                                pf:SetAttribute("Active", false)
+                                pf:SetAttribute("IsFalling", true)
+                                pf:SetAttribute("FallVelY", 30)
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+    end
+
+    if isGrounded and not wasGrounded then
+        squashX = 1.35
+        squashY = 0.65
+        spawnLandingSmoke(posX, posY)
+    end
+
+    if not isGrounded then
+        LegL.Position = UDim2.new(0, 2, 0, (velY < 0 and 12 or 17))
+        LegR.Position = UDim2.new(0, 9, 0, (velY < 0 and 12 or 17))
+        LegL.Size = UDim2.new(0, 3, 0, 6)
+        LegR.Size = UDim2.new(0, 3, 0, 6)
+        Body.Position = UDim2.new(0, 2, 0, 8)
+        Body.Size = UDim2.new(0, 10, 0, (velY < 0 and 7 or 9))
+        Head.Position = UDim2.new(0, 2, 0, 0)
+    elseif math.abs(velX) > 5 then
+        local legOffset = math.sin(animTime * 20) * 3.5
+        LegL.Position = UDim2.new(0, 2, 0, 16 + legOffset)
+        LegR.Position = UDim2.new(0, 9, 0, 16 - legOffset)
+        LegL.Size = UDim2.new(0, 3, 0, 6)
+        LegR.Size = UDim2.new(0, 3, 0, 6)
+        Body.Position = UDim2.new(0, 2, 0, 8)
+        Body.Size = UDim2.new(0, 10, 0, 8 + math.abs(legOffset) * 0.2)
+        Head.Position = UDim2.new(0, 2, 0, 0)
+    else
+        local bounce = math.abs(math.sin(animTime * 6)) * 2
+        Head.Position = UDim2.new(0, 2, 0, 0 + bounce)
+        Body.Position = UDim2.new(0, 2, 0, 8 + bounce)
+        Body.Size = UDim2.new(0, 10, 0, 8)
+        LegL.Position = UDim2.new(0, 2, 0, 16 + bounce)
+        LegL.Size = UDim2.new(0, 3, 0, math.max(2, 6 - bounce))
+        LegR.Position = UDim2.new(0, 9, 0, 16 + bounce)
+        LegR.Size = UDim2.new(0, 3, 0, math.max(2, 6 - bounce))
+    end
+
+    PixelCharacter.Size = UDim2.new(0, 14 * squashX, 0, 22 * squashY)
+
+    for _, pt in ipairs(currentPortals) do
+        local px, py = pt.Position.X.Offset, pt.Position.Y.Offset
+        if (nextX + pW >= px) and (nextX <= px + 22) and (nextY + pH >= py) and (nextY <= py + 34) then
+            local isCorrect = pt:GetAttribute("Correct")
+            
+            if isCorrect == false then
+                TrollAlertText.Text = "😜 DÍNH CỔNG GIẢ RỒI! ĐOÁN XEM AI CHẾT NÀO?"
+                respawnPlayer()
+                return
+            else
+                playPortalEnterAnimation(pt, function()
+                    currentLevel = currentLevel + 1
+                    playMapTransitionAnimation(currentLevel, function()
+                        if loadMap(currentLevel) then
+                            posX, posY = activeMapData.spawn.x, activeMapData.spawn.y
+                            velY = 0
+                            jumpsLeft = maxJumps
+                            targetRotation = 0
+                            PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+                        else
+                            gameFinished = true
+                            bgMusic:Stop()
+                            bgMusic:Destroy()
+
+                            local WinLabel = Instance.new("TextLabel", Canvas)
+                            WinLabel.Size = UDim2.new(1, 0, 1, 0)
+                            WinLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                            WinLabel.Text = "👑 QUÁ ĐỈNH!\nBẠN ĐÃ VƯỢT QUA TẤT CẢ CÁC BẪY TROLL!"
+                            WinLabel.Font = Enum.Font.FredokaOne
+                            WinLabel.TextSize = 16
+                            WinLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+                            WinLabel.ZIndex = 25
+                            task.wait(4)
+                            ScreenGui:Destroy()
+                        end
+                    end)
+                end)
+                return
+            end
+        end
+    end
+
+    if nextX < 0 then nextX = 0 end
+    if nextX > 510 - pW then nextX = 510 - pW end
+
+    if nextY > 230 then
+        respawnPlayer()
+        return
+    end
+
+    posX, posY = nextX, nextY
+    PixelCharacter.Position = UDim2.new(0, posX, 0, posY)
+end)
